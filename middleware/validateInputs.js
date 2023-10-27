@@ -20,4 +20,6 @@ function inputValidation(request, response, next) {
     next()
 }
 
-export { inputValidationRules, inputValidation }
+const validateInputs = { inputValidationRules, inputValidation }
+
+export default validateInputs

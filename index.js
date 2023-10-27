@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import db from './config/db.config.js'
 import cors from 'cors'
 import errorHandler from './middleware/errorHnadler.js';
+import validateInputs from './middleware/validateInputs.js';
 
 const PORT = process.env.PORT || 3000
 
@@ -12,11 +13,7 @@ const app = express()
 
 
 // Croos origin configuration 
-app.use(cors({
-    origin: true,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-}))
+app.use(cors())
 
 app.use(express.json())
 app.use(express.urlencoded({
@@ -29,8 +26,10 @@ app.use('/auth', authRoute)
 // Error Handling
 app.use(errorHandler)
 
+//Validation Inputs
+// app.use(validateInputs.inputValidation())
+
 //Connection to db
-mongoose.set('strictQuery', false)
 mongoose.connect(db.mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
