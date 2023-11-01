@@ -6,7 +6,7 @@ import User from '../modals/user.js'
 
 const router = express.Router()
 
-router.post('/register', async (request, response, next) => {
+router.post('/signup', async (request, response, next) => {
     try {
         const { userName, email, password } = request.body;
 
@@ -19,7 +19,7 @@ router.post('/register', async (request, response, next) => {
             return response.status(400).send({ message: "Enter all required fields" })
         }
         const newUser = {
-            userName, email, password: bcrypt.hashSync(password, 12)
+            userName, email, password: bcrypt.hashSync(password.toString(), 12)
         }
 
         const user = await User.create(newUser)
@@ -34,9 +34,42 @@ router.post('/register', async (request, response, next) => {
         response.status(201).send({
             message: "User Created Successfully",
             token,
-            data: {
-                user,
-            },
+            user,
+        });
+        // response.send({ message: "User Created Successfully", user })
+    } catch (error) {
+        next(error)
+    }
+})
+router.post('/login', async (request, response, next) => {
+    try {
+        const { email, password } = request.body;
+
+        // validation for the entered book
+        if (
+            !email ||
+            !password
+        ) {
+            return response.status(400).send({ message: "Enter all required fields" })
+        }
+        
+        const newUser = {
+            email, password: bcrypt.hashSync(password.toString(), 12)
+        }
+
+        const user = await User.findOne(newUser)
+
+        const token = jsonwebtoken.sign({
+            id: user._id,
+            userName: user.userName? user.userName: undefined,
+            email: user.email? user.email: undefined
+        }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN })
+
+
+        response.status(201).send({
+            message: "User Created Successfully",
+            token,
+            user,
         });
         // response.send({ message: "User Created Successfully", user })
     } catch (error) {

@@ -12,9 +12,8 @@ function errorHandler(error, request, response, next) {
     } else if (error.code === 11000) {
         const duplicatedKey = error.keyValue.userName ? 'userName' : 'email';
 
-
         response.status(409).send({
-            message: `${duplicatedKey} "${error.keyValue[duplicatedKey]}" is taken`
+            message: `${duplicatedKey} is already in use`
         })
     } else if (error.name === 'JsonWebTokenError') {
         response.status(401).send({
@@ -26,7 +25,8 @@ function errorHandler(error, request, response, next) {
         })
     } else {
         response.status(500).send({
-            message: "Internal server error"
+            message: error,
+           d: request.body
         })
     }
 }
