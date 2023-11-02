@@ -1,6 +1,5 @@
 import express from "express";
 import Post from "../modals/post.js";
-import cloudinary from './cloudinary/coudinary.js';
 
 const postRoute = express.Router();
 
@@ -8,24 +7,16 @@ postRoute.post(
     "/create",
     async (req, res, next) => {
         try {
-            const { text, image } = req.body;
+            const { text } = req.body;
 
-
-            if (!text && !image) {
+            if (!text) {
                 return res.status(400).send({
                     message: "Post can't be empty!",
                 });
             }
 
-            if (image) {
-                cloudinary.v2.uploader.upload(image,
-                    {
-                        upload_preset: 'unsigned_upload',
-                        public_id: '',
-                        allowed_formats: ['png', 'jpg', 'jpeg', 'svg', 'ico', 'jfif', 'webp']
-                    },
-                    function (error, result) { console.log(result); });
-            }
+            
+                
 
             const newPost = {
                 text,
