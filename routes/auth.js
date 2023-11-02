@@ -4,11 +4,11 @@ import jsonwebtoken from 'jsonwebtoken'
 import User from '../modals/user.js'
 // import validateInputs from '../middleware/validateInputs.js'
 
-const router = express.Router()
+const authRoute = express.Router()
 
-router.post('/signup', async (request, response, next) => {
+authRoute.post('/signup', async (req, res, next) => {
     try {
-        const { userName, email, password } = request.body;
+        const { userName, email, password } = req.body;
 
         // validation for the entered book
         if (
@@ -16,8 +16,19 @@ router.post('/signup', async (request, response, next) => {
             !email ||
             !password
         ) {
-            return response.status(400).send({ message: "Enter all required fields" })
+            return res.status(400).send({ message: "Enter all required fields" })
         }
+
+
+        const usernameRegex = /^[a-zA-Z0-9_]{2,}$/;
+        const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+
+        if (!usernameRegex.test(userName)) {
+            return res.status(400).send({ message: "Invalid username" })
+        } else if (!emailRegex.test(email)) {
+            return res.status(400).send({ message: "Invalid email" })
+        }
+
         const newUser = {
             userName, email, password: bcrypt.hashSync(password.toString(), 12)
         }
@@ -31,62 +42,67 @@ router.post('/signup', async (request, response, next) => {
         }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN })
 
 
-        response.status(201).send({
+        res.status(201).send({
             message: "User Created Successfully",
             token,
             user,
         });
-        // response.send({ message: "User Created Successfully", user })
+        // res.send({ message: "User Created Successfully", user })
     } catch (error) {
         next(error)
     }
 })
-router.post('/login', async (request, response, next) => {
+authRoute.post('/login', async (req, res, next) => {
     try {
-        const { email, password } = request.body;
+        const { email, password } = req.body;
 
         // validation for the entered book
         if (
             !email ||
             !password
         ) {
-            return response.status(400).send({ message: "Enter all required fields" })
-        }
-        
-        const newUser = {
-            email, password: bcrypt.hashSync(password.toString(), 12)
+            return res.status(400).send({ message: "Enter all required fields" })
         }
 
-        const user = await User.findOne(newUser)
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
         const token = jsonwebtoken.sign({
             id: user._id,
-            userName: user.userName? user.userName: undefined,
-            email: user.email? user.email: undefined
+            userName: user.userName,
+            email: user.email
         }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN })
 
 
-        response.status(201).send({
-            message: "User Created Successfully",
+        res.status(201).send({
+            message: "Logged in successfully",
             token,
             user,
         });
-        // response.send({ message: "User Created Successfully", user })
+        // res.send({ message: "User Created Successfully", user })
     } catch (error) {
         next(error)
     }
 })
 
-router.get('/users', async (request, response, next) => {
+authRoute.get('/users', async (req, res, next) => {
     try {
         const users = await User.find({})
-        return response.status(200).json({
+        return res.status(200).json({
             users: users
         })
     } catch (error) {
         console.log(error.message);
-        response.status(500).send({ message: error.message })
+        res.status(500).send({ message: error.message })
     }
 })
 
-export { router }
+export default authRoute;

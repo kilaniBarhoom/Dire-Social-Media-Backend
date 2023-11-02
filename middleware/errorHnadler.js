@@ -25,8 +25,7 @@ function errorHandler(error, request, response, next) {
         })
     } else {
         response.status(500).send({
-            message: error,
-           d: request.body
+            message: "Internal server",
         })
     }
 }

@@ -1,15 +1,24 @@
 import 'dotenv/config.js'
 import express from "express";
-import { router as authRoute } from './routes/auth.js'
+import authRoute from './routes/auth.js'
+import postRoute from './routes/post.js';
 import mongoose from "mongoose";
 import db from './config/db.config.js'
 import cors from 'cors'
 import errorHandler from './middleware/errorHnadler.js';
-import validateInputs from './middleware/validateInputs.js';
+import bodyParser from 'body-parser'
+
+
 
 const PORT = process.env.PORT || 3000
 
 const app = express()
+
+
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 
 
 // Croos origin configuration s
@@ -21,6 +30,7 @@ app.use(express.urlencoded({
 }))
 
 app.use('/', authRoute)
+app.use('/posts', postRoute)
 
 
 // Error Handling
