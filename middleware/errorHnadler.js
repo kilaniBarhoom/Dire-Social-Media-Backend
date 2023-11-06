@@ -24,6 +24,7 @@ function errorHandler(error, request, response, next) {
             message: error.message
         })
     } else {
+        console.log(error);
         response.status(500).send({
             message: "Internal server",
         })

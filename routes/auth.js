@@ -1,6 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcryptjs'
-import jsonwebtoken from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import User from '../modals/user.js'
 // import validateInputs from '../middleware/validateInputs.js'
 
@@ -35,7 +35,7 @@ authRoute.post('/signup', async (req, res, next) => {
 
         const user = await User.create(newUser)
 
-        const token = jsonwebtoken.sign({
+        const token = jwt.sign({
             id: user._id,
             userName: user.userName,
             email: user.email
@@ -75,7 +75,7 @@ authRoute.post('/login', async (req, res, next) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const token = jsonwebtoken.sign({
+        const token = jwt.sign({
             id: user._id,
             userName: user.userName,
             email: user.email

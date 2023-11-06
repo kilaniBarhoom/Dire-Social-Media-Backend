@@ -15,8 +15,9 @@ const commentSchema = mongoose.Schema({
 
 const postSchema = mongoose.Schema(
     {
-        img: String,
-        text: String,
+        // img: String,
+        owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Reference to the user who posted the post
+        text: { type: String, required: true },
         likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // An array of user IDs who liked the post
         comments: [commentSchema], // An array of comments
     },
