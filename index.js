@@ -14,16 +14,11 @@ const PORT = process.env.PORT || 3000
 
 const app = express()
 
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
-
 // Croos origin configuration s
 app.use(cors())
-
 app.use(express.json())
 app.use(express.urlencoded({
     extended: true

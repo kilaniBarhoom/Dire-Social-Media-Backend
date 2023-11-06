@@ -7,6 +7,7 @@ const auth = async (req, res, next) => {
         accessToken = req.headers.authorization.split(" ")[1];
     }
     if (!accessToken) {
+        console.log("no access");
         return res.status(401).send({ message: "Not authorized" });
     }
     try {

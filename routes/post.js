@@ -15,4 +15,25 @@ postRoute.route("/:postId")
     .put(auth, controller.update)
     .delete(auth, controller.deletePost);
 
+
+
+postRoute.route("/:postId/likes")
+    .get(controller.getAllLikes)
+    .post(auth, controller.likePost)
+
+postRoute.route("/:postId/comments")
+    .get(controller.getAllComments)
+    .post(auth, controller.commentOnPost)
+
+
+
+
+postRoute.route('/:postId/comments/:commentId')
+    .get(controller.getComment)
+    .post(auth, controller.replyToComment)
+    .delete(auth, controller.deleteComment)
+    .put(auth, controller.editComment)
+
+
+
 export default postRoute;
