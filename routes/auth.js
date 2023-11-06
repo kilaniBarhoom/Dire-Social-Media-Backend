@@ -2,6 +2,7 @@ import express from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../modals/user.js'
+import auth from '../middleware/auth.js'
 // import validateInputs from '../middleware/validateInputs.js'
 
 const authRoute = express.Router()
@@ -104,5 +105,17 @@ authRoute.get('/users', async (req, res, next) => {
         res.status(500).send({ message: error.message })
     }
 })
+
+authRoute.delete("/delete-account", auth, async (req, res, next) => {
+    try {
+        const user = await User.findByIdAndDelete(req.user._id);
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+        res.send({ message: "User deleted successfully" });
+    } catch (error) {
+        next(error);
+    }
+});
 
 export default authRoute;

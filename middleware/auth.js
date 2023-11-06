@@ -12,6 +12,9 @@ const auth = async (req, res, next) => {
     try {
         const decoded = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
         req.user = await User.findById(decoded.id);
+        if (!req.user) {
+            return res.status(404).send({ message: "User account was deleted" });
+        }
         next();
     } catch (error) {
         console.log(error);
