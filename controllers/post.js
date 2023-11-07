@@ -97,6 +97,11 @@ export const update = async (req, res, next) => {
     try {
         const { postId } = req.params;
         const newText = req.body.text;
+        if (!newText) {
+            return res.status(402).send({
+                message: "Enter new post text"
+            })
+        }
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -119,10 +124,10 @@ export const deletePost = async (req, res, next) => {
         const postId = req.params.postId;
 
         const post = await Post.findOne({ _id: postId })
-        if (req.user._id.toString() !== post.owner.toString()) {
-            return res.status(401).send({ message: "You are not the post owner" });
-        }
         if (post) {
+            if (req.user._id.toString() !== post.owner.toString()) {
+                return res.status(401).send({ message: "You are not the post owner" });
+            }
             const userId = req.user._id.toString();
             const user = await User.findById(userId)
             user.posts.pull(postId)
@@ -278,6 +283,76 @@ export const replyToComment = async (req, res, next) => {
     }
 }
 
+export const deleteReply = async (req, res, next) => {
+    try {
+        const userId = req.user._id.toString()
+
+        const { postId, commentId, replyId } = req.params
+        const post = await Post.findById(postId)
+
+        if (post) {
+            const comment = post.comments.find(comment => comment._id.toString() == commentId.toString())
+            if (comment) {
+                const reply = comment.replies.find(reply => reply._id.toString() == replyId.toString())
+                if (reply) {
+                    if (userId != reply.userId.toString() && post.owner._id != userId) {
+                        return res.status(401).send({ message: "You can't delete this reply" });
+                    }
+
+                    comment.replies.pull(replyId)
+                    await post.save()
+                    res.status(200).send({ message: "reply deleted" })
+                } else {
+                    res.status(401).send({ message: "Reply not found" })
+                }
+            } else {
+                res.status(401).send({ message: "Comment not found" })
+            }
+        } else {
+            res.send({ message: "Post not found" })
+        }
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const editReply = async (req, res, next) => {
+    try {
+        const userId = req.user._id.toString()
+        const { postId, commentId, replyId } = req.params
+
+        const newReply = req.body.reply
+        if (!newReply) {
+            return res.status(402).send({ message: "Enter a reply" })
+        }
+
+        const post = await Post.findById(postId)
+
+        if (post) {
+            const comment = post.comments.find(comment => comment._id.toString() == commentId.toString())
+            if (comment) {
+                const reply = comment.replies.find(reply => reply._id.toString() == replyId.toString())
+                if (reply) {
+                    if (userId != reply.userId.toString()) {
+                        return res.status(401).send({ message: "You can't edit this reply" });
+                    }
+                    reply.reply = newReply
+                    await post.save()
+                    res.status(200).send({ message: "Reply Edited" })
+                } else {
+                    res.status(401).send({ message: "Reply not found" })
+                }
+            } else {
+                res.status(401).send({ message: "Comment not found" })
+            }
+        } else {
+            res.send({ message: "Post not found" })
+        }
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const deleteComment = async (req, res, next) => {
     try {
         const commentId = req.params.commentId;
@@ -288,8 +363,8 @@ export const deleteComment = async (req, res, next) => {
         if (post) {
             const comment = post.comments.find(comment => comment._id.toString() == commentId.toString())
             if (comment) {
-                if (userId !== comment.userId.toString() || post.owner._id !== comment.userId.toString()) {
-                    return res.status(401).send({ message: "You are not the post owner" });
+                if (userId != comment.userId.toString() && post.owner._id != userId) {
+                    return res.status(401).send({ message: "You can't delete this comment" });
                 }
 
                 post.comments.pull(commentId)

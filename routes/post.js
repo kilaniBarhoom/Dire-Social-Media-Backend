@@ -34,6 +34,8 @@ postRoute.route('/:postId/comments/:commentId')
     .delete(auth, controller.deleteComment)
     .put(auth, controller.editComment)
 
-
+postRoute.route('/:postId/comments/:commentId/replies/:replyId')
+    .delete(auth, controller.deleteReply)
+    .put(auth, controller.editReply)
 
 export default postRoute;
