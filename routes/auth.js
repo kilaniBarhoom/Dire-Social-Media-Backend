@@ -14,7 +14,6 @@ authRoute.get('/:userId/posts', controller.getPosts)
 
 // Follow a user
 
-authRoute.route('/follow/:userId')
-    .post(auth, controller.follow)
+authRoute.post('/:userId/follow', auth, controller.follow)
 
 export default authRoute;
