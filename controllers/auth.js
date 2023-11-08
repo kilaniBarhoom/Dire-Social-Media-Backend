@@ -184,7 +184,7 @@ export const follow = async (req, res, next) => {
         const followingId = req.user._id.toString()
         const followedUser = await User.findById(followedId)
         const followingUser = await User.findById(followingId)
-        if (followedUser == followingUser) {
+        if (followedId == followingId) {
             return res.status(400).send({ message: "User can't follow himself" })
         }
         if (followedUser && followingUser) {
